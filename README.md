@@ -1,2 +1,2 @@
 # fcc
-C complier for Fein Language
+C compiler for Fein Language

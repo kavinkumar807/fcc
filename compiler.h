@@ -1,7 +1,9 @@
 #ifndef fcc_compiler_h
 #define fcc_compiler_h
 
+#include "vm.h"
+
 // function declaration for compiler
-void compile(const char* source);
+bool compile(const char* source, Chunk* chunk);
 
 #endif
