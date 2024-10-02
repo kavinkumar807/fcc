@@ -38,9 +38,9 @@ static Entry* findEntry(Entry* entries, int capacity, ObjString* key) {
     } else if (entry->key == key) {
       // We found the key.
       return entry;
+    }
 
     index = (index + 1) % capacity;
-  }
  }
 }
 
@@ -67,7 +67,7 @@ static void adjustCapacity(Table* table, int capacity) {
   table->count = 0;
   for(int i = 0; i < table->capacity; i++) {
     Entry* entry = &table->entries[i];
-    if(entry->key == NULL) continue;;
+    if(entry->key == NULL) continue;
 
     Entry* dest = findEntry(entries, capacity, entry->key);
     dest->key = entry->key;
@@ -121,10 +121,8 @@ void tableAddAll(Table* from, Table* to) {
 }
 
 // function to find intern string
-ObjString* tableFindString(Table* table, const char* chars,
-                           int length, uint32_t hash) {
+ObjString* tableFindString(Table* table, const char* chars, int length, uint32_t hash) {
   if (table->count == 0) return NULL;
-
   uint32_t index = hash % table->capacity;
   for (;;) {
     Entry* entry = &table->entries[index];
