@@ -44,7 +44,15 @@ typedef struct {
   int depth;
 } Local;
 
+typedef enum {
+  TYPE_FUNCTION,
+  TYPE_SCRIPT
+} FunctionType;
+
 typedef struct {
+  ObjFunction* function;
+  FunctionType type;
+
   Local locals[UINT8_COUNT];
   int localCount;
   int scopeDepth;
@@ -52,11 +60,9 @@ typedef struct {
 
 Parser parser;
 Compiler* current = NULL;
-Chunk* compilingChunk;
 
-// function to return current compiling chunk
 static Chunk* currentChunk() {
-  return compilingChunk;
+  return &current->function->chunk;
 }
 
 // function to handle error
@@ -173,10 +179,18 @@ static void emitConstant(Value value) {
   emitBytes(OP_CONSTANT, makeConstant(value));
 }
 
-static void initCompiler(Compiler* compiler) {
+static void initCompiler(Compiler* compiler, FunctionType type) {
+  compiler->function = NULL;
+  compiler->type = type;
   compiler->localCount = 0;
   compiler->scopeDepth = 0;
+  compiler->function = newFunction();
   current = compiler;
+
+  Local* local = &current->locals[current->localCount++];
+  local->depth = 0;
+  local->name.start = "";
+  local->name.length = 0;
 }
 
 // function to patch jump
@@ -193,13 +207,16 @@ static void patchJump(int offset) {
 }
 
 // function to end compiler
-static void endCompiler() {
+static ObjFunction* endCompiler() {
   emitReturn();
+  ObjFunction* function = current->function;
+
 #ifdef DEBUG_PRINT_CODE
   if (!parser.hadError) {
-    disassembleChunk(currentChunk(), "code");
+    disassembleChunk(currentChunk(), function->name != NULL ? function->name->chars : "<script>");
   }
 #endif
+  return function;
 }
 
 // function to handle local variable scope depth by incrementing
@@ -707,11 +724,10 @@ static void statement() {
                | varDecl
                | statement ;
  */
-bool compile(const char* source, Chunk* chunk) {
+ObjFunction* compile(const char* source) {
   initScanner(source);
   Compiler compiler;
-  initCompiler(&compiler);
-  compilingChunk = chunk;
+  initCompiler(&compiler, TYPE_SCRIPT);
 
   parser.hadError = false;
   parser.panicMode = false;
@@ -723,8 +739,8 @@ bool compile(const char* source, Chunk* chunk) {
   }
   
 
-  endCompiler();
-  return !parser.hadError;
+  ObjFunction* function = endCompiler();
+  return parser.hadError ? NULL : function;
 }
 
 
