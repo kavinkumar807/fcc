@@ -115,10 +115,6 @@ While the VM uses a stack for temporary values during computation, objects (curr
 
 The VM executes bytecode instructions defined by the `OpCode` enum in `chunk.h`. Here's a summary of the opcodes:
 
-### 10. OpCode Table
-
-The VM executes bytecode instructions defined by the `OpCode` enum in `chunk.h`. Here's a summary of the opcodes:
-
 | OpCode             | Operands        | Description                                                                  |
 | :----------------- | :-------------- | :--------------------------------------------------------------------------- |
 | `OP_CONSTANT`      | `uint8_t` index | Pushes a constant value from the chunk's constant pool onto the stack.         |
